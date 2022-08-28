@@ -3,12 +3,12 @@
   <div class="common-layout">
     <el-container>
       <el-header class="header">
-        <el-row class="center"><h2>DEAL 项目更新工具</h2></el-row>
+        <el-row class="center"><h2>DEAL Update Tool</h2></el-row>
         <el-row :gutter="20">
           <el-col :span="2" :offset="6">
             <el-select v-model="type" class="m-2" placeholder="Select"> <el-option v-for="item in ['Init', 'Ongoing', 'Paused']" :key="item" :label="item" :value="item" /> </el-select
           ></el-col>
-          <el-col :span="2">count: {{ count }}</el-col>
+          <el-col :span="4">TotalCount: {{ count }}</el-col>
           <el-col :span="2" :offset="6">
             <el-button type="primary" size="large" @click="dialogInfo.isShow = true">Add</el-button>
           </el-col>
@@ -33,9 +33,9 @@
           </el-table-column>
           <el-table-column label="Operations" width="150">
             <template #default="scope">
-              <el-button v-if="type === 'Init'" size="small" type="primary" @click="handelEnable(scope.$index, scope.row)">Start</el-button>
+              <el-button v-if="type === 'Init' || type === 'Paused'" size="small" type="primary" @click="handelEnable(scope.$index, scope.row)">Start</el-button>
               <el-button v-else-if="type === 'Ongoing'" size="small" type="warning" @click="handlePaused(scope.$index, scope.row)">Pause</el-button>
-              <el-button v-else-if="type === 'Paused'" size="small" type="warning" @click="handelEnable(scope.$index, scope.row)">Enable</el-button>
+              <!-- <el-button v-else-if="type === 'Paused'" size="small" type="primary" @click="handelEnable(scope.$index, scope.row)">Enable</el-button> -->
               <el-button v-if="type === 'Init' || type === 'Paused'" size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">Delete</el-button>
             </template>
           </el-table-column>
@@ -103,7 +103,20 @@ const init = async () => {
         type: 'error',
       })
     })
-  console.log('data: ', data)
+
+  await fetch('/api/rule/total', {
+    method: 'GET',
+  })
+    .then((res) => res.json())
+    .then((res) => {
+      count.value = res.data
+    })
+    .catch((err) => {
+      ElMessage({
+        message: '服务器错误: ' + err,
+        type: 'error',
+      })
+    })
 }
 init.bind(this)
 init()
@@ -134,7 +147,7 @@ const handleDelete = (index: number, row: Rule) => {
     })
 }
 const handelEnable = (index: number, row: Rule) => {
-  fetch('/api/rule/' + row.rid + '/10', {
+  fetch('/api/rule/' + row.rid + '/5000', {
     method: 'GET',
   })
     .then((res) => {
