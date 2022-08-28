@@ -13,7 +13,7 @@
         </el-row>
       </el-header>
       <el-main class="center" style="margin-top: 20px">
-        <el-table ref="runningRef1" row-key="id" :data="runningData" style="width: 1000px">
+        <el-table ref="initRef" row-key="id" :data="runningData" class="table">
           <el-table-column prop="ruleName" label="ruleName" width="100" />
           <el-table-column prop="description" label="description" width="400" />
           <el-table-column prop="type" label="type" width="100" />
@@ -53,9 +53,10 @@ interface Rule {
 }
 
 const tableRef = ref<InstanceType<typeof ElTable>>()
-const initRef1 = ref<InstanceType<typeof ElTable>>()
-const runningRef2 = ref<InstanceType<typeof ElTable>>()
-const pausedRef3 = ref<InstanceType<typeof ElTable>>()
+const initRef = ref<InstanceType<typeof ElTable>>()
+const runningRef = ref<InstanceType<typeof ElTable>>()
+const pausedRef = ref<InstanceType<typeof ElTable>>()
+
 
 const runningData: Rule[] = [
   {
@@ -94,5 +95,9 @@ function changeVisble() {
 }
 .float-right {
   float: right;
+}
+
+.table{
+  width: 1000px;
 }
 </style>

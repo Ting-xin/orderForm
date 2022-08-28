@@ -30,7 +30,7 @@
 <script lang="ts" setup>
 import TreeSelect from './TreeSelect.vue'
 import { ref, reactive, unref } from 'vue'
-import type { FormInstance, FormRules } from 'element-plus'
+import { ElMessage, FormInstance, FormRules } from 'element-plus'
 
 const refTreeSelect = ref()
 const props = defineProps(['visible'])
@@ -65,8 +65,30 @@ const submit = async (formEl: FormInstance | undefined) => {
       console.log(typeof temp)
       fetch('/api/rule', {
         method: 'POST',
-        body: JSON.stringify(temp)
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(temp),
       })
+        .then((res) => {
+          if (res.status === 200) {
+            ElMessage({
+              message: '新建成功！',
+              type: 'success',
+            })
+          } else {
+            ElMessage({
+              message: '新建失败',
+              type: 'warning',
+            })
+          }
+        })
+        .catch((err) => {
+          ElMessage({
+            message: '服务器错误: ' + err,
+            type: 'error',
+          })
+        })
     } else {
       console.log('error submit!', fields)
     }
@@ -75,7 +97,7 @@ const submit = async (formEl: FormInstance | undefined) => {
 
 const resetForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return
-  refTreeSelect.value.handleNodeClick({label: ''})
+  refTreeSelect.value.handleNodeClick({ label: '' })
   formEl.resetFields()
 }
 
