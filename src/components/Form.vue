@@ -34,7 +34,7 @@ import { ElMessage, FormInstance, FormRules } from 'element-plus'
 
 const refTreeSelect = ref()
 const props = defineProps(['visible'])
-const emit = defineEmits(['changeVisible'])
+const emit = defineEmits(['changeVisible', 'init'])
 
 const handleClose = function () {
   emit('changeVisible')
@@ -76,6 +76,7 @@ const submit = async (formEl: FormInstance | undefined) => {
               message: '新建成功！',
               type: 'success',
             })
+            emit('init')
           } else {
             ElMessage({
               message: '新建失败',
