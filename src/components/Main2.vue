@@ -38,7 +38,6 @@ let isContent = ref(true);
 const change = () => {
   isContent.value = !isContent.value
 }
-console.log(isContent)
 </script>
 
 <style scoped>

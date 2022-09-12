@@ -1,6 +1,6 @@
 <template>
   <el-row class="center mar">
-    <el-col :span="3"> 自然文本: </el-col>
+    <el-col :span="3"> 短语组合: </el-col>
     <el-col :span="16">
       <el-checkbox-group v-model="checked" @change="handleCheckedChange">
         <el-checkbox v-for="item in compose" :key="item" :label="item">{{ item }}</el-checkbox>
@@ -28,31 +28,35 @@
   </el-row>
   <el-row class="center mar">
     <el-col :span="3"> 促销类型: </el-col>
-    <el-col :span="10">
+    <el-col :span="8">
       <el-radio-group v-model="promoRadio">
         <el-radio :label="0">DEAL </el-radio>
         <el-radio :label="1">COUPON</el-radio>
       </el-radio-group>
     </el-col>
-    <el-col :span="6">
-      <el-button type="primary" size="large" @click="add">确定</el-button>
+    <el-col :span="8">
+      <el-button type="primary" size="large" @click="add" style="width: 200px">添加</el-button>
     </el-col>
   </el-row>
   <el-divider />
   <el-table ref="tableRef" row-key="id" :data="data.data" class="table" stripe>
-    <el-table-column prop="compose" label="Phrase combinations" width="250" show-overflow-tooltip="true" align="center" />
-    <el-table-column prop="location" label="Scope" width="200" show-overflow-tooltip="true" align="center" />
-    <el-table-column prop="promoType" label="PromoType" width="200" show-overflow-tooltip="true" align="center" />
-    <el-table-column prop="state" label="state" width="200" align="center">
+    <el-table-column prop="compose" label="短语组合" width="100" show-overflow-tooltip="true" align="center" />
+    <el-table-column prop="description" label="内容" width="200" show-overflow-tooltip="true" align="center" />
+    <el-table-column prop="actionType" label="生效范围" width="300" show-overflow-tooltip="true" align="center">
+      <template #default="scope"> {{ scope.row.actionType }} : {{ scope.row.actionObject }} </template>
+    </el-table-column>
+    <el-table-column prop="promoType" label="类型" width="100" show-overflow-tooltip="true" align="center" />
+    <el-table-column prop="state" label="状态" width="200" align="center">
       <template #default="scope">
         <el-tag v-if="scope.state === 'Ongoing'">{{ scope.row.state }}</el-tag>
         <el-tag v-else state="warning">{{ scope.row.state }}</el-tag>
       </template>
     </el-table-column>
+    <el-table-column prop="count" label="更新总数" width="100" show-overflow-tooltip="true" align="center" />
     <el-table-column label="Operations" width="300" align="center">
       <template #default="scope">
         <el-button v-if="scope.row.state === 'INIT' || scope.row.state === 'PAUSED'" type="primary" @click="handelEnable(scope.$index, scope.row)">开始</el-button>
-        <el-button v-else-if="scope.row.state === 'ONGOING'" type="warning" @click="handlePaused(scope.$index, scope.row)">暂停</el-button>
+        <el-button v-else-if="scope.row.state === 'ONGOING'" type="warning" @click="handlePaused(scope.$index, scope.row)" style="width: 130px">暂停</el-button>
         <el-button v-if="scope.row.state === 'INIT' || scope.row.state === 'PAUSED'" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
       </template>
     </el-table-column>
@@ -82,7 +86,7 @@ const tableRef = ref<InstanceType<typeof ElTable>>()
 let data = reactive({ data: [] })
 
 const init = async () => {
-  await fetch('/api/content', {
+  await fetch('/api/rule', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -94,7 +98,7 @@ const init = async () => {
         data.data = res.data
       } else {
         ElMessage({
-          message: '获取失败',
+          message: '获取规则失败',
           type: 'warning',
         })
       }
@@ -110,7 +114,7 @@ init.bind(this)
 init()
 
 const isIndeterminate = ref(true)
-const checked = ref([''])
+const checked = ref([])
 const compose = ['自然文本A', '自然文本B', '自然文本C', '自然文本D', '自然文本E', '自然文本F']
 const handleCheckedChange = (value: string[]) => {
   const checkedCount = value.length
@@ -180,13 +184,15 @@ onMounted(() => {
 
 const promoRadio = ref(0)
 const add = () => {
-  if (compose.length === 0) {
+  if (checked.value.length === 0) {
     ElMessage({
       message: '请选择短语组合',
       type: 'warning',
     })
     return
   }
+  const composeData: string[] = []
+  checked.value.forEach((i) => composeData.push((i as string).replace('自然文本', '')))
   if (radio.value === 0 && operationCate.value === '') {
     ElMessage({
       message: '请选择分类',
@@ -201,16 +207,16 @@ const add = () => {
     })
     return
   }
-  fetch('/api/content', {
+  fetch('/api/rule', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      compose: compose,
-      promoType: promoRadio ? 'COUNPON' : 'DEAL',
-      actionType: radio ? 'Brand' : 'Cate',
-      actionObject: radio ? brand : operationCate,
+      compose: composeData,
+      promoType: promoRadio.value ? 'COUPON' : 'DEAL',
+      actionType: radio.value ? 'Brand' : 'Cate',
+      actionObject: radio.value ? brand.value : operationCate.value,
     }),
   })
     .then((res) => {
@@ -236,7 +242,7 @@ const add = () => {
 }
 
 const handleDelete = (index: number, row: Rule) => {
-  fetch('/api/rule/' + row.cid, {
+  fetch('/api/rule/' + row.rid, {
     method: 'DELETE',
   })
     .then((res) => {
@@ -261,8 +267,8 @@ const handleDelete = (index: number, row: Rule) => {
     })
 }
 const handelEnable = (index: number, row: Rule) => {
-  fetch('/api/rule/' + row.cid + '/5000', {
-    method: 'GET',
+  fetch('/api/rule/sa/' + row.rid, {
+    method: 'PUT',
   })
     .then((res) => {
       if (res.status === 200) {
@@ -286,8 +292,8 @@ const handelEnable = (index: number, row: Rule) => {
     })
 }
 const handlePaused = (index: number, row: Rule) => {
-  fetch('/api/rule/' + row.cid, {
-    method: 'GET',
+  fetch('/api/rule/pa/' + row.rid, {
+    method: 'PUT',
   })
     .then((res) => {
       if (res.status === 200) {

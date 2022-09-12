@@ -1,7 +1,7 @@
 <template>
   <el-row class="center">
     <el-col :span="8" class="center">
-      <span style="width: 200px; margin-right: 20px">自然文本:</span>
+      <span style="width: 200px; margin-right: 20px">文本:</span>
       <span style="width: 600px; margin-left: 0px; padding-left: 0px">
         <el-input v-model="text" placeholder="请填写文本" size="large" style="margin-left: 0px; padding-left: 0px" />
       </span>
@@ -10,7 +10,7 @@
       <span style="width: 200px; margin-right: 20px">选择位置:</span>
       <span style="width: 200px">
         <el-select v-model="location" class="m-6" placeholder="Select" size="large" style="width: 180px">
-          <el-option v-for="item in ['A', 'B', 'C', 'D', 'E', 'F']" :key="item" :label="'自然文本' + item" :value="'自然文本' + item" />
+          <el-option v-for="item in ['A', 'B', 'C', 'D', 'E', 'F']" :key="item" :label="'自然文本' + item" :value="item" />
         </el-select>
       </span>
     </el-col>
@@ -30,9 +30,21 @@
     </el-table-column>
     <el-table-column label="操作" width="300" align="center">
       <template #default="scope">
-        <el-button v-if="scope.row.state === 'INIT' || scope.row.state === 'PAUSED'" type="primary" @click="handelEnable(scope.$index, scope.row)">开始</el-button>
-        <el-button v-else-if="scope.row.state === 'ONGOING'" type="warning" @click="handlePaused(scope.$index, scope.row)">暂停</el-button>
-        <el-button v-if="scope.row.state === 'INIT' || scope.row.state === 'PAUSED'" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+        <span v-if="(scope.row.useCount === 0 && scope.row.state === 'INIT') || scope.row.state === 'PAUSED'">
+          <el-button v-if="scope.row.state === 'INIT' || scope.row.state === 'PAUSED'" type="primary" @click="handelEnable(scope.$index, scope.row)">开始</el-button>
+          <el-button v-else-if="scope.row.state === 'ONGOING'" type="warning" @click="handlePaused(scope.$index, scope.row)">暂停</el-button>
+        </span>
+        <span v-else>
+          <el-button v-if="scope.row.state === 'INIT' || scope.row.state === 'PAUSED'" type="primary" @click="handelEnable(scope.$index, scope.row)" style="width: 130px">开始</el-button>
+          <el-button v-else-if="scope.row.state === 'ONGOING'" type="warning" @click="handlePaused(scope.$index, scope.row)" style="width: 130px">暂停</el-button>
+        </span>
+        <el-button
+          style="margin-left: 10px"
+          v-if="(scope.row.useCount === 0 && scope.row.state === 'INIT') || scope.row.state === 'PAUSED'"
+          type="danger"
+          @click="handleDelete(scope.$index, scope.row)"
+          >删除</el-button
+        >
       </template>
     </el-table-column>
   </el-table>
@@ -67,7 +79,7 @@ const init = async () => {
         data.data = res.data
       } else {
         ElMessage({
-          message: '获取失败',
+          message: '获取内容失败',
           type: 'warning',
         })
       }
@@ -83,7 +95,7 @@ init.bind(this)
 init()
 
 const text = ref('')
-const location = ref('自然文本A')
+const location = ref('A')
 const add = () => {
   fetch('/api/content', {
     method: 'POST',
@@ -143,8 +155,8 @@ const handleDelete = (index: number, row: Content) => {
     })
 }
 const handelEnable = (index: number, row: Content) => {
-  fetch('/api/content/' + row.cid + '/5000', {
-    method: 'GET',
+  fetch('/api/content/sa/' + row.cid, {
+    method: 'PUT',
   })
     .then((res) => {
       if (res.status === 200) {
@@ -168,8 +180,8 @@ const handelEnable = (index: number, row: Content) => {
     })
 }
 const handlePaused = (index: number, row: Content) => {
-  fetch('/api/content/' + row.cid, {
-    method: 'GET',
+  fetch('/api/content/pa/' + row.cid, {
+    method: 'PUT',
   })
     .then((res) => {
       if (res.status === 200) {
