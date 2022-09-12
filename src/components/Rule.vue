@@ -28,13 +28,19 @@
   </el-row>
   <el-row class="center mar">
     <el-col :span="3"> 促销类型: </el-col>
-    <el-col :span="8">
+    <el-col :span="4">
       <el-radio-group v-model="promoRadio">
         <el-radio :label="0">DEAL </el-radio>
         <el-radio :label="1">COUPON</el-radio>
       </el-radio-group>
     </el-col>
-    <el-col :span="8">
+    <el-col :span="3">
+      <span style="margin-left: 20px">规则总数:</span>
+    </el-col>
+    <el-col :span="3">
+      {{ count }}
+    </el-col>
+    <el-col :span="6">
       <el-button type="primary" size="large" @click="add" style="width: 200px">添加</el-button>
     </el-col>
   </el-row>
@@ -108,6 +114,19 @@ const init = async () => {
         message: '服务器错误: ' + err,
         type: 'error',
       })
+    })
+
+  await fetch('/api/rule/total', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => response.json())
+    .then((res) => {
+      if (res.code === 0) {
+        count.value = res.data
+      }
     })
 }
 init.bind(this)
@@ -219,13 +238,19 @@ const add = () => {
       actionObject: radio.value ? brand.value : operationCate.value,
     }),
   })
+    .then((response) => response.json())
     .then((res) => {
-      if (res.status === 200) {
+      if (res.code === 0) {
         ElMessage({
           message: '添加成功',
           type: 'success',
         })
         init()
+      } else if (res.code === -1) {
+        ElMessage({
+          message: '该规则没有对应的内容，添加失败',
+          type: 'warning',
+        })
       } else {
         ElMessage({
           message: '添加失败',

@@ -15,7 +15,7 @@
       </span>
     </el-col>
     <el-col :span="2" :offset="1">
-      <el-button type="primary" size="large" @click="add">确定</el-button>
+      <el-button type="primary" size="large" @click="add">添加</el-button>
     </el-col>
   </el-row>
   <el-divider />
@@ -30,8 +30,8 @@
     </el-table-column>
     <el-table-column label="操作" width="300" align="center">
       <template #default="scope">
-        <span v-if="(scope.row.useCount === 0 && scope.row.state === 'INIT') || scope.row.state === 'PAUSED'">
-          <el-button v-if="scope.row.state === 'INIT' || scope.row.state === 'PAUSED'" type="primary" @click="handelEnable(scope.$index, scope.row)">开始</el-button>
+        <!-- <span v-if="(scope.row.useCount === 0 && scope.row.state === 'INIT') || scope.row.state === 'PAUSED'">
+          <el-button v-if="(scope.row.useCount != 0 && scope.row.state === 'INIT') || scope.row.state === 'PAUSED'" type="primary" @click="handelEnable(scope.$index, scope.row)">开始</el-button>
           <el-button v-else-if="scope.row.state === 'ONGOING'" type="warning" @click="handlePaused(scope.$index, scope.row)">暂停</el-button>
         </span>
         <span v-else>
@@ -44,7 +44,10 @@
           type="danger"
           @click="handleDelete(scope.$index, scope.row)"
           >删除</el-button
-        >
+        > -->
+        <el-button v-if="scope.row.useCount === 0" type="danger" @click="handleDelete(scope.$index, scope.row)" style="width: 130px">删除</el-button>
+        <el-button v-else-if="scope.row.state === 'ONGOING'" type="warning" @click="handlePaused(scope.$index, scope.row)" style="width: 130px">暂停</el-button>
+        <el-button v-else type="primary" @click="handelEnable(scope.$index, scope.row)" style="width: 130px">开始</el-button>
       </template>
     </el-table-column>
   </el-table>
