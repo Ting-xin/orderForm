@@ -1,5 +1,5 @@
 <template>
-  <Main />
+  <Main2 />
 </template>
 
 <script>
@@ -9,7 +9,7 @@ name: 'App',
 </script>
 
 <script setup>
-import Main from './components/Main.vue'
+import Main2 from './components/Main2.vue'
 </script>
 
 <style scoped>

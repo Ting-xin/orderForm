@@ -1,7 +1,7 @@
 <template>
   <el-popover placement="bottom-start" :width="200" trigger="click">
     <template #reference>
-      <el-input v-model="state.label" style="width: 360px" readonly placeholder="Please input" />
+      <el-input v-model="state.label" style="width: 240px" readonly placeholder="选择类别" size="large" />
     </template>
     <el-tree :data="props.treeData" :props="props.defaultProps" @node-click="handleNodeClick" />
   </el-popover>
